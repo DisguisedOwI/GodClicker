@@ -65,6 +65,7 @@ def handle_f6_press(event):
     toggle_auto_click()
 
 
+# The Creators GitHub
 def on_image_click():
     import webbrowser
     webbrowser.open("https://github.com/DisguisedOwI")
