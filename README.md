@@ -2,6 +2,6 @@ This is a project I did for fun because I found most of the auto clickers out th
 
 ![Capture](https://github.com/DisguisedOwI/GodClicker/assets/92737576/20dc41a1-8270-43a3-8196-c7399f4a33c0)
 
-My Auto Clicker ~400CPS
+My Auto Clicker ~450CPS
 
 op auto clicker ~50CPS
