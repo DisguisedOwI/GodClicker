@@ -22,7 +22,6 @@ ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 def toggle_right_click():
     global right_click_enabled
     right_click_enabled = not right_click_enabled
-    print(right_click_enabled)
 
 def click():
     if right_click_enabled:
