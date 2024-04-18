@@ -19,10 +19,19 @@ ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 
 # Function to perform mouse click
 
+def toggle_right_click():
+    global right_click_enabled
+    right_click_enabled = not right_click_enabled
+    print(right_click_enabled)
 
 def click():
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0)
-    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0)
+    if right_click_enabled:
+        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, 0, 0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, 0, 0)
+
+    else:
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0)
+        win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0)
 
 # Function to start/stop auto-clicking
 def toggle_auto_click():
@@ -153,6 +162,13 @@ delay_entry_Millis.place(x=Mix, y=Miy)
 Offset = ctk.CTkCheckBox(app, text="Random Offset", checkbox_width=20, checkbox_height=20, corner_radius=5, border_width=2.5)
 #size = (20, 20)
 Offset.place(x=15, y=55)
+
+#----------------------------------------------
+
+# Right Click toggle checkbox
+right_click_enabled = False
+Right_Click = ctk.CTkCheckBox(app, text="Right Click", checkbox_width=20, checkbox_height=20, corner_radius=5, border_width=2.5, command=toggle_right_click)
+Right_Click.place(x=15, y=85)
 
 #----------------------------------------------
 
