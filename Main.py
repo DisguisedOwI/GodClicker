@@ -1,3 +1,8 @@
+# ------ TODO LIST ------
+# -  that you can use the "-" sign
+# -  Add "Get Click Position" button to turn on and off and works
+# -  Add move at X,Y function to work
+
 import time
 import keyboard
 import win32api
@@ -11,6 +16,7 @@ import tkinter as tk
 from mousekey import MouseKey
 import io
 import tempfile
+from pynput import mouse
 
 mkey = MouseKey()
 
@@ -21,16 +27,21 @@ auto_click_delay = 0  				# Initialize auto_click_delay globally
 offset_checked = False 			# Variable to track offset checkbox status
 repeat_checked = False 			# Variable to track repeat checkbox status
 auto_click_delay = 0.5  			# Default delay in seconds
-current_version="4.0" 			# Current version of the application
-window_width = 400 			# Width of the main window
+current_version="5.0" 			# Current version of the application
+window_width = 400 				# Width of the main window
 window_height = 270 			# Height of the main window
+right_click_enabled = False  # Variable to track right-click status
+get_position_button_enabled = False  # Variable to track get position button status
 
 
 # Set appearance mode and default color theme
 ctk.set_appearance_mode("System")  # Modes: system (default), light, dark
 ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 
-
+# Function to validate numeric input only
+def validate_numeric_input(char):
+    """Allow only digits and decimal points"""
+    return char.isdigit() or char == "." 
 
 def check_for_updates():
 	try:
@@ -92,6 +103,38 @@ def toggle_repeat():
 	global repeat_checked
 	repeat_checked = not repeat_checked
 	print(f"Repeat is now {'enabled' if repeat_checked else 'disabled'}")
+
+def click_xy():
+	pass
+
+
+# Function to get mouse position on click
+def get_mouse_position():
+	print("Click anywhere on the screen...")
+	
+	# Function to update GUI safely from main thread
+	def update_position_entries(x, y):
+		position_entry_X.delete(0, 'end')
+		position_entry_X.insert(0, str(x))
+		position_entry_Y.delete(0, 'end')
+		position_entry_Y.insert(0, str(y))
+
+	# This function runs when the mouse is clicked
+	def on_click(x, y, button, pressed):
+		if pressed:
+			print(f"Mouse clicked at ({x}, {y})")
+			# Schedule GUI update in main thread
+			app.after(0, update_position_entries, x, y)
+			return False  # Stop the listener
+
+	# Start listening for mouse click in a separate thread
+	def start_mouse_listener():
+		with mouse.Listener(on_click=on_click) as listener:
+			listener.join()
+	
+	# Run the listener in a separate thread to avoid blocking the GUI
+	listener_thread = threading.Thread(target=start_mouse_listener, daemon=True)
+	listener_thread.start()
 
 # Function to perform auto-clicking in a separate thread
 def perform_auto_click_thread():
@@ -172,6 +215,9 @@ app.iconbitmap(tmp_icon.name)
 # Make the window not resizable
 app.resizable(False, False)
 
+# Register the validation function for numeric input only
+validate_func = app.register(validate_numeric_input)
+
 # Create the Auto Click button
 auto_click_button = ctk.CTkButton(
 	app, text="Start Auto Click (F6)", command=toggle_auto_click)
@@ -194,7 +240,7 @@ Mix, Miy = N + 3 * H, 15
 delay_label = ctk.CTkLabel(app, text="Hours")
 delay_label.place(x=Hx+V, y=Hy)
 
-delay_entry_Hours= ctk.CTkEntry(app, width=50)
+delay_entry_Hours= ctk.CTkEntry(app, width=50, validate="key", validatecommand=(validate_func, '%S'))
 initial_Hours_text = "0"  # Change this to the desired initial text
 delay_entry_Hours.insert(0, initial_Hours_text)  # Set initial text
 delay_entry_Hours.place(x=Hx, y=Hy)
@@ -205,7 +251,7 @@ delay_entry_Hours.place(x=Hx, y=Hy)
 delay_label = ctk.CTkLabel(app, text="Mins")
 delay_label.place(x=Mx+V, y=My)
 
-delay_entry_Minutes= ctk.CTkEntry(app, width=50)
+delay_entry_Minutes= ctk.CTkEntry(app, width=50, validate="key", validatecommand=(validate_func, '%S'))
 initial_minutes_text = "0"  # Change this to the desired initial text
 delay_entry_Minutes.insert(0, initial_minutes_text)  # Set initial text
 delay_entry_Minutes.place(x=Mx, y=My)
@@ -216,7 +262,7 @@ delay_entry_Minutes.place(x=Mx, y=My)
 delay_label = ctk.CTkLabel(app, text="Secs")
 delay_label.place(x=Sx+V, y=Sy)
 
-delay_entry_Seconds= ctk.CTkEntry(app, width=50)
+delay_entry_Seconds= ctk.CTkEntry(app, width=50, validate="key", validatecommand=(validate_func, '%S'))
 initial_seconds_text = "0"  # Change this to the desired initial text
 delay_entry_Seconds.insert(0, initial_seconds_text)  # Set initial text
 delay_entry_Seconds.place(x=Sx, y=Sy)
@@ -227,7 +273,7 @@ delay_entry_Seconds.place(x=Sx, y=Sy)
 delay_label = ctk.CTkLabel(app, text="Millis")
 delay_label.place(x=Mix+V, y=Miy)
 
-delay_entry_Millis = ctk.CTkEntry(app, width=50)
+delay_entry_Millis = ctk.CTkEntry(app, width=50, validate="key", validatecommand=(validate_func, '%S'))
 initial_millis_text = "500"  # Change this to the desired initial text
 delay_entry_Millis.insert(0, initial_millis_text)  # Set initial text
 delay_entry_Millis.place(x=Mix, y=Miy)
@@ -242,9 +288,33 @@ Offset.place(x=15, y=55)
 #----------------------------------------------
 
 # Right Click toggle checkbox
-right_click_enabled = False
 Right_Click = ctk.CTkCheckBox(app, text="Right Click", checkbox_width=20, checkbox_height=20, corner_radius=5, border_width=2.5, command=toggle_right_click)
 Right_Click.place(x=15, y=135)
+
+#----------------------------------------------
+
+# X, Y get mouse position
+position_label = ctk.CTkLabel(app, text="X:")
+position_label.place(x=15, y=170)
+
+position_entry_X = ctk.CTkEntry(app, width=50, height=20, validate="key", validatecommand=(validate_func, '%S'))
+position_entry_X.insert(0, "0")  # Default X position
+position_entry_X.place(x=35, y=170)
+
+position_label = ctk.CTkLabel(app, text="Y:")
+position_label.place(x=100, y=170)
+position_entry_Y = ctk.CTkEntry(app, width=50, height=20, validate="key", validatecommand=(validate_func, '%S'))
+position_entry_Y.insert(0, "0")  # Default Y position
+position_entry_Y.place(x=120, y=170)
+
+
+get_position_button  = ctk.CTkButton(app, text="Get Click Position", command=get_mouse_position)
+get_position_button.configure(bg_color="#F84E4E", hover_color="#5E3AFF")															#FIX This line 			--------------------------------------------------------------------
+get_position_button.place(x=200, y=170)
+
+# if true click rt23t325623523532523532rt23t325623523532523532rt23t325623523532523532rt23t325623523532523532rt23t325623523532523532rt23t325623523532523532rt23t325623523532523532
+position_button = ctk.CTkCheckBox(app, text="", checkbox_width=20, checkbox_height=20, corner_radius=5, border_width=2.5, command=click_xy)
+position_button.place(x=350, y=170)
 
 #----------------------------------------------
 
@@ -252,7 +322,7 @@ Right_Click.place(x=15, y=135)
 delay_label = ctk.CTkLabel(app, text="Millis")
 delay_label.place(x=135+V, y=55)
 
-delay_entry_Offset = ctk.CTkEntry(app, width=50, height=20)
+delay_entry_Offset = ctk.CTkEntry(app, width=50, height=20, validate="key", validatecommand=(validate_func, '%S'))
 initial_Offset_text = "40"  # Change this to the desired initial text
 delay_entry_Offset.insert(0, initial_Offset_text)  # Set initial text
 delay_entry_Offset.place(x=135, y=55)
@@ -267,7 +337,7 @@ Repeat.place(x=15, y=85)
 delay_label = ctk.CTkLabel(app, text="Times")
 delay_label.place(x=135+V, y=85)
 
-Repeat_times= ctk.CTkEntry(app, width=50, height=20)
+Repeat_times= ctk.CTkEntry(app, width=50, height=20, validate="key", validatecommand=(validate_func, '%S'))
 Repeat_times_text = "10"  # Change this to the desired initial text
 Repeat_times.insert(0, Repeat_times_text)  # Set initial text
 Repeat_times.place(x=135, y=85)
@@ -300,7 +370,7 @@ if latest_version!=current_version:
 	print(f"Latest version: {latest_version}")
 	print("An update is available!")
 
-	Update_text=ctk.CTkButton(app,text="Update Available!",font=("Arial",12,"underline","italic"),command=on_image_click,fg_color="#242424",hover_color="#242424",width=20,height=10)
+	Update_text=ctk.CTkButton(app,text="Update Available!",font=("Arial",12,"underline","italic"),command=on_image_click,fg_color="#242424",hover_color="#303030",width=20,height=10)
 	Update_text.place(relx=0.75,rely=0.94,anchor=tk.CENTER)
 
 
