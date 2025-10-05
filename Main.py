@@ -128,10 +128,18 @@ def perform_auto_click_thread():
 def update_button_text():
 	if auto_click_on:
 		auto_click_button.after(1000, update_button_text)
-		last_name = "Auto Clicking... (F6)"
+		last_name = "Auto Clicking (F6)"
 		auto_click_button.configure(text=f"Stop {last_name}")
+		auto_click_button._fg_color = "#1FA58C"
+		auto_click_button._hover_color = "#14705F" 
+		app.title("God Clicker - On")
+
+#I don't know why, but if I haven't put the colors this way, it won't work. ???
+
 	else:
-		auto_click_button.configure(text="Start Auto Click (F6)")
+		auto_click_button.configure(text="Start Auto Click (F6)", fg_color="#1F6AA5", hover_color="#144870")
+		auto_click_button.configure()
+		app.title("God Clicker - Off")
 
 # Handle F6 key press event
 def handle_f6_press(event):
@@ -290,6 +298,7 @@ Image_import_button_icon = ctk.CTkImage(Image_import_button_icon)
 # Create the button
 Github_button = ctk.CTkButton(app, text="", command=on_image_click, image=Image_import_button_icon, width=20, height=20)
 Github_button.place(relx=0.94, rely=0.93, anchor=tk.CENTER)
+Github_button.configure(fg_color="#242424", hover_color="#303030")
 
 
 # Function to handle the GitHub button click
