@@ -145,7 +145,7 @@ def on_image_click():
 # Create the main application window
 
 # GitHub raw URL for the .ico file
-ICON_URL = "https://raw.githubusercontent.com/DisguisedOwI/GodClicker/main/_internal/icons/logoV4.ico"
+ICON_URL = "https://raw.githubusercontent.com/DisguisedOwI/GodClicker/main/icons/logoV4.ico"
 
 # Download the icon
 response = requests.get(ICON_URL)
@@ -275,7 +275,7 @@ Repeat_times.place(x=135, y=85)
 
 
 # URL to the raw image file on GitHub
-image_url = "https://raw.githubusercontent.com/DisguisedOwI/GodClicker/main/_internal/icons/github.png"
+image_url = "https://raw.githubusercontent.com/DisguisedOwI/GodClicker/main/icons/github.png"
 
 # Download the image
 response = requests.get(image_url)
