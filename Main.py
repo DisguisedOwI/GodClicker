@@ -4,7 +4,7 @@ import win32api
 import win32con
 import customtkinter as ctk
 import threading
-from PIL import Image, ImageTk
+from PIL import Image
 import random
 import requests
 import tkinter as tk
@@ -130,7 +130,7 @@ def update_button_text():
 		auto_click_button.after(1000, update_button_text)
 		last_name = "Auto Clicking (F6)"
 		auto_click_button.configure(text=f"Stop {last_name}")
-		auto_click_button._fg_color = "#1FA58C"
+		auto_click_button._fg_color = "#019479"
 		auto_click_button._hover_color = "#14705F" 
 		app.title("God Clicker - On")
 
@@ -171,15 +171,6 @@ app.iconbitmap(tmp_icon.name)
 
 # Make the window not resizable
 app.resizable(False, False)
-
-
-#my_image = ctk.CTkImage(light_image=Image.open('Test.png'),
-#	dark_image=Image.open('Test.png'),
-#	size=(400, 270))  # Load the image and set its size
-
-#my_label = ctk.CTkLabel(app, text="", image=my_image)
-#my_label.pack(pady=0, padx=0, fill=tk.BOTH, expand=True)  # Add the image label to the window
-
 
 # Create the Auto Click button
 auto_click_button = ctk.CTkButton(
@@ -311,8 +302,6 @@ if latest_version!=current_version:
 
 	Update_text=ctk.CTkButton(app,text="Update Available!",font=("Arial",12,"underline","italic"),command=on_image_click,fg_color="#242424",hover_color="#242424",width=20,height=10)
 	Update_text.place(relx=0.75,rely=0.94,anchor=tk.CENTER)
-
-	
 
 
 # Function to update auto click delay when the entry value changes
