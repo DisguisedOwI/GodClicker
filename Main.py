@@ -2,6 +2,8 @@
 # -  that you can use the "-" sign
 # -  Add "Get Click Position" button to turn on and off and works
 # -  Add move at X,Y function to work
+# - aligned Random Hold Time button
+# - FIX hold_offset large numbers make you have to wait for it to turn off or  crash. and the same thing happens if you put a large number in all other text boxes. first time it works, second time it doesn't YAY TvT
 
 import time
 import keyboard
@@ -24,7 +26,8 @@ mkey = MouseKey()
 auto_click_on = False 				# Variable to track right-click status
 auto_click_thread = None 	# Thread for auto-clicking
 auto_click_delay = 0  				# Initialize auto_click_delay globally
-offset_checked = False 			# Variable to track offset checkbox status
+click_offset_checked = False 			# Variable to track offset checkbox status
+hold_offset_checked = False 		# Variable to track hold offset checkbox status
 repeat_checked = False 			# Variable to track repeat checkbox status
 auto_click_delay = 0.5  			# Default delay in seconds
 current_version="5.0" 			# Current version of the application
@@ -64,6 +67,11 @@ def toggle_right_click():
 	right_click_enabled = not right_click_enabled
 
 def click():
+	global right_click_enabled, hold_offset_checked, initial_Hold_text
+
+	if hold_offset_checked:
+		time.sleep(int(initial_Hold_text) / 1000)
+	
 	if right_click_enabled:
 		win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTDOWN, 0, 0)
 		win32api.mouse_event(win32con.MOUSEEVENTF_RIGHTUP, 0, 0)
@@ -95,9 +103,13 @@ def start_auto_click_thread():
 	auto_click_thread.daemon = True
 	auto_click_thread.start()
 
-def toggle_offset():
-	global offset_checked
-	offset_checked = not offset_checked
+def toggle_click_offset():
+	global click_offset_checked
+	click_offset_checked = not click_offset_checked
+
+def toggle_hold_offset():
+	global hold_offset_checked
+	hold_offset_checked = not hold_offset_checked
 
 def toggle_repeat():
 	global repeat_checked
@@ -138,13 +150,16 @@ def get_mouse_position():
 
 # Function to perform auto-clicking in a separate thread
 def perform_auto_click_thread():
-	if offset_checked:  # Check if the Offset checkbox is checked
+	if click_offset_checked:  # Check if the Offset checkbox is checked
 		while auto_click_on:
 			click()
 			time.sleep(auto_click_delay)
-			if offset_checked:  # Check if the Offset checkbox is checked
+			if click_offset_checked:  # Check if the Offset checkbox is checked
 				random_delay = random.uniform(0, float(delay_entry_Offset.get()) / 1000)
 				time.sleep(random_delay)
+			if hold_offset_checked:  # Check if the Hold checkbox is checked
+				hold_time = random.uniform(0, float(delay_entry_Hold.get()) / 1000)
+				time.sleep(hold_time)
 
 	elif repeat_checked:  # Check if the Repeat checkbox is checked
 		repeat_times = int(Repeat_times.get())
@@ -153,7 +168,7 @@ def perform_auto_click_thread():
 				break
 			click()
 			time.sleep(auto_click_delay)
-			if offset_checked:
+			if click_offset_checked:
 				random_delay = random.uniform(0, float(delay_entry_Offset.get()) / 1000)
 				time.sleep(random_delay)
 
@@ -280,10 +295,33 @@ delay_entry_Millis.place(x=Mix, y=Miy)
 
 #----------------------------------------------
 
-# Random offset
-Offset = ctk.CTkCheckBox(app, text="Random Offset", checkbox_width=20, checkbox_height=20, corner_radius=5, border_width=2.5)
-#size = (20, 20)
+# Random Click Offset
+Offset = ctk.CTkCheckBox(app, text="Random Click Offset", checkbox_width=20, checkbox_height=20, corner_radius=5, border_width=2.5)
 Offset.place(x=15, y=55)
+
+# Create the Delay label and entry
+delay_label = ctk.CTkLabel(app, text="Millis")
+delay_label.place(x=165+V, y=55)
+
+delay_entry_Offset = ctk.CTkEntry(app, width=50, height=20, validate="key", validatecommand=(validate_func, '%S'))
+initial_Offset_text = "40"  # Change this to the desired initial text
+delay_entry_Offset.insert(0, initial_Offset_text)  # Set initial text
+delay_entry_Offset.place(x=165, y=55)
+
+#----------------------------------------------
+
+# Random Hold Offset
+Hold = ctk.CTkCheckBox(app, text="Random Hold Offset", checkbox_width=20, checkbox_height=20, corner_radius=5, border_width=2.5)
+Hold.place(x=15, y=100)
+
+# Create the Delay label and entry
+delay_label = ctk.CTkLabel(app, text="Millis")
+delay_label.place(x=165+V, y=100)
+
+delay_entry_Hold = ctk.CTkEntry(app, width=50, height=20, validate="key", validatecommand=(validate_func, '%S'))
+initial_Hold_text = "40"  # Change this to the desired initial text
+delay_entry_Hold.insert(0, initial_Hold_text)  # Set initial text
+delay_entry_Hold.place(x=165, y=100)
 
 #----------------------------------------------
 
@@ -315,17 +353,6 @@ get_position_button.place(x=200, y=170)
 # if true click rt23t325623523532523532rt23t325623523532523532rt23t325623523532523532rt23t325623523532523532rt23t325623523532523532rt23t325623523532523532rt23t325623523532523532
 position_button = ctk.CTkCheckBox(app, text="", checkbox_width=20, checkbox_height=20, corner_radius=5, border_width=2.5, command=click_xy)
 position_button.place(x=350, y=170)
-
-#----------------------------------------------
-
-# Create the Delay label and entry
-delay_label = ctk.CTkLabel(app, text="Millis")
-delay_label.place(x=135+V, y=55)
-
-delay_entry_Offset = ctk.CTkEntry(app, width=50, height=20, validate="key", validatecommand=(validate_func, '%S'))
-initial_Offset_text = "40"  # Change this to the desired initial text
-delay_entry_Offset.insert(0, initial_Offset_text)  # Set initial text
-delay_entry_Offset.place(x=135, y=55)
 
 #----------------------------------------------
 
@@ -416,7 +443,8 @@ delay_entry_Minutes.bind("<KeyRelease>", lambda event: update_auto_click_delay()
 delay_entry_Seconds.bind("<KeyRelease>", lambda event: update_auto_click_delay())
 delay_entry_Millis.bind("<KeyRelease>", lambda event: update_auto_click_delay())
 
-Offset.configure(command=toggle_offset)
+Offset.configure(command=toggle_click_offset)
+Hold.configure(command=toggle_hold_offset)
 Repeat.configure(command=toggle_repeat)
 
 # Set the appearance mode and default color theme
